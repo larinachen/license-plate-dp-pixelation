@@ -1,4 +1,1 @@
-{
-    "Cars0": {"xmin":226, "xmax":419, "ymin":125, "ymax":173},
-    "Cars1": {"xmin":134, "xmax":262, "ymin":128, "ymax":160}
-}
+{"Cars0": {"xmin": 226, "xmax": 419, "ymin": 125, "ymax": 173}, "Cars1": {"xmin": 134, "xmax": 262, "ymin": 128, "ymax": 160}}

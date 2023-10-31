@@ -30,8 +30,8 @@ for carID, bounding_box, in bounding_box_data.items():
     
     # compute grid dimensions
     num_cells = 16
-    cell_width = math.floor(license_plate_width/num_cells)
-    cell_height = math.floor(license_plate_height/num_cells)
+    cell_width = math.ceil(license_plate_width/num_cells)
+    cell_height = math.ceil(license_plate_height/num_cells)
 
     cells = [[0 for r in range(1,num_cells)] for c in range(1,num_cells)]
 
