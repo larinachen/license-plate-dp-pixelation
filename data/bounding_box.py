@@ -4,8 +4,8 @@ import re
 import xml.etree.ElementTree as xet
 from glob import glob
 
-# source code referenced from on Kaggle:
-# <link>
+# source code for parsing annotations is referenced from @chinnakotla on Kaggle: 
+# https://www.kaggle.com/code/chinnakotla17/number-plate-recognition
 
 data_dir = os.path.dirname(os.path.abspath(__file__))
 global_path = glob(f"{data_dir}/annotations/*.xml")
