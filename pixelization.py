@@ -1,80 +1,76 @@
 from PIL import Image, ImageOps
 import math
 import numpy as np
+import json
 
-# file name to open and file name to write out
-file_name = 'murphy.png'
-save_as = 'gray_pixelated.png'
+# get license plate bounding box:
+with open('bounding_box.json', 'r') as bounding_box_data_file:
+    bounding_box_data = json.load(bounding_box_data_file)
 
-# open image
-image = Image.open(file_name)
+# noise up each image 
+for carID, bounding_box, in bounding_box_data.items():
 
-# convert image to grayscale
-gray_image = ImageOps.grayscale(image)
+    # file name to open and file name to write out
+    file_name = f'{carID}.png'
+    gray_file_name = f'gray_{carID}.png'
 
-# save grayscale image for reference
-gray_image.save('grey_murphy.png')
+    # open image
+    image = Image.open(file_name)
 
+    # convert image to grayscale
+    gray_image = ImageOps.grayscale(image)
 
-# get picture dimensions
-width = gray_image.size[0]
-height = gray_image.size[1]
+    # save grayscale image for reference
+    gray_image.save(gray_file_name)
 
-# compute grid dimensions
-num_cells = 15
-cell_width = math.trunc(width/num_cells)
-cell_height = math.trunc(height/num_cells)
+    # get bounding box dimensions
+    xmin, xmax, ymin, ymax = bounding_box["xmin"], bounding_box["xmax"], bounding_box["ymin"], bounding_box["ymax"]
+    license_plate_width = xmax - xmin
+    license_plate_height = ymax - ymin
+    
+    # compute grid dimensions
+    num_cells = 16
+    cell_width = math.floor(license_plate_width/num_cells)
+    cell_height = math.floor(license_plate_height/num_cells)
 
-cells = [[0 for r in range(num_cells)] for c in range(num_cells)]
+    cells = [[0 for r in range(1,num_cells)] for c in range(1,num_cells)]
 
-cur_width = 0
-cur_height = 0
+    # Calculate the noised up average color value for each cell
+    # Loop through all cells
+    for row in range(num_cells):
+        for col in range(num_cells):
+            cell_sum = 0
 
-# loop through all cells
-for row in range(num_cells):
-    for col in range(num_cells):
+            # Loop through all pixels in each cell
+            for x in range(cell_width):
+                for y in range(cell_height):
+                    pixel_x = xmin + col * cell_width + x
+                    pixel_y = ymin + row * cell_height + y
 
-        # loop through all pixels in each cell
-        for x in range(cell_width):
-            for y in range(cell_height):
-                cells[row][col] += gray_image.getpixel((cur_width + x, cur_height + y))
+                    # Bounds checking
+                    if pixel_x < xmax and pixel_y < ymax:
+                        cell_sum += gray_image.getpixel((pixel_x, pixel_y))
 
-        # calculate average color value in each cell
-        cells[row][col] = cells[row][col] / (cell_width * cell_height)
+            # Calculate average color value in each cell
+            num_pixels = min(cell_width, xmax - xmin) * min(cell_height, ymax - ymin)
+            cell_average = cell_sum / num_pixels
 
-        m = cell_width * cell_height
-        noise = np.random.laplace(0, 255 / (num_cells*num_cells))
-        print(noise)
-        cells[row][col] += noise
+            # Add noise
+            noise = np.random.laplace(0, 255 / (num_cells * num_cells))
+            cell_average += noise
 
-        if(cells[row][col] > 255):
-            cells[row][col] = 255
+            # Ensure the cell value is within [0, 255]
+            cell_average = max(0, min(255, cell_average))
 
-        cur_width += cell_width
+            # Assign the cell value to all pixels in the cell
+            for x in range(cell_width):
+                for y in range(cell_height):
+                    pixel_x = xmin + col * cell_width + x
+                    pixel_y = ymin + row * cell_height + y
 
-    cur_height += cell_height
-    cur_width = 0
+                    # Bounds checking
+                    if pixel_x < xmax and pixel_y < ymax:
+                        gray_image.putpixel((pixel_x, pixel_y), round(cell_average))
 
-
-cur_width = 0
-cur_height = 0
-
-# loop through all cells
-for row in range(num_cells):
-    for col in range(num_cells):
-
-        # loop through all pixels in each cell
-        for x in range(cell_width):
-            for y in range(cell_height):
-
-                # set each pixel to the average color of this cell
-                gray_image.putpixel((cur_width + x, cur_height + y), round(cells[row][col]))
-
-        cur_width += cell_width
-       
-    cur_height += cell_height
-    cur_width = 0
-
-# save pixelated image
-gray_image.save("noise_image.png")
-
+    # Save pixelated image
+    gray_image.save(f"noise_{carID}.png")
