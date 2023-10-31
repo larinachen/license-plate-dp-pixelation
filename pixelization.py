@@ -4,14 +4,14 @@ import numpy as np
 import json
 
 # get license plate bounding box:
-with open('bounding_box.json', 'r') as bounding_box_data_file:
+with open('data/bounding_box.json', 'r') as bounding_box_data_file:
     bounding_box_data = json.load(bounding_box_data_file)
 
 # noise up each image 
 for carID, bounding_box, in bounding_box_data.items():
 
     # file name to open and file name to write out
-    file_name = f'{carID}.png'
+    file_name = f'data/images/{carID}.png'
     gray_file_name = f'gray_{carID}.png'
 
     # open image
@@ -20,8 +20,8 @@ for carID, bounding_box, in bounding_box_data.items():
     # convert image to grayscale
     gray_image = ImageOps.grayscale(image)
 
-    # save grayscale image for reference
-    gray_image.save(gray_file_name)
+    # save grayscale image for reference - not used
+    # gray_image.save(gray_file_name)
 
     # get bounding box dimensions
     xmin, xmax, ymin, ymax = bounding_box["xmin"], bounding_box["xmax"], bounding_box["ymin"], bounding_box["ymax"]
@@ -73,4 +73,4 @@ for carID, bounding_box, in bounding_box_data.items():
                         gray_image.putpixel((pixel_x, pixel_y), round(cell_average))
 
     # Save pixelated image
-    gray_image.save(f"noise_{carID}.png")
+    gray_image.save(f"output/noise_{carID}.png")
