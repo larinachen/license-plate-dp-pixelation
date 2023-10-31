@@ -13,7 +13,6 @@ def main():
 
         # file name to open and file name to write out
         file_name = f'data/images/{carID}.png'
-        gray_file_name = f'gray_{carID}.png'
 
         # open image
         image = Image.open(file_name)
