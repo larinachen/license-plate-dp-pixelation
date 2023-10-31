@@ -20,6 +20,7 @@ def main():
         # convert image to grayscale
         gray_image = ImageOps.grayscale(image)
 
+        pixelate_one_image(carID, gray_image, bounding_box, "laplace")
         pixelate_one_image(carID, gray_image, bounding_box, "gaussian")
 
 
@@ -35,8 +36,7 @@ def pixelate_one_image(carID, gray_image, bounding_box, mode):
     cell_width = math.ceil(license_plate_width/num_cells)
     cell_height = math.ceil(license_plate_height/num_cells)
 
-    # Calculate the noised up average color value for each cell
-    # Loop through all cells
+    # Loop through each cell to change the color value of its pixels to the average value + noise
     for row in range(num_cells):
         for col in range(num_cells):
             cell_sum = 0
@@ -60,6 +60,7 @@ def pixelate_one_image(carID, gray_image, bounding_box, mode):
                 lp_noise = np.random.laplace(0, 255 / (num_cells * num_cells * epsilon))
                 cell_average += lp_noise
             if mode == "gaussian":
+                # Add gaussian noise
                 gaus_noise = np.random.normal(0, 255 / (num_cells * num_cells))
                 cell_average += gaus_noise
 
